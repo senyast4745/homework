@@ -185,7 +185,7 @@ public class CityCamActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             isDownloaded = true;
-            progressView.setVisibility(View.GONE);
+
             return null;
         }
 
@@ -284,24 +284,19 @@ public class CityCamActivity extends AppCompatActivity {
 
         void attachActivity(CityCamActivity activity) {
             this.cityCamActivity = activity;
-            updateView(View.GONE);
+            updateView();
         }
 
 
         void updateView() {
             if (cityCamActivity != null) {
                 cityCamActivity.camImageView.setImageBitmap(webcam.getBitmap());
-
+                progressView.setVisibility(View.GONE);
+                isDownloaded = true;
             }
         }
 
-        void updateView(int a) {
-            if (cityCamActivity != null) {
-                cityCamActivity.camImageView.setImageBitmap(webcam.getBitmap());
 
-            }
-            progressView.setVisibility(a);
-        }
 
 
     }
