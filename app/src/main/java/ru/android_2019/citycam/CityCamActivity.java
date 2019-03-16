@@ -184,7 +184,7 @@ public class CityCamActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            isDownloaded = true;
+//            isDownloaded = true;
 
             return null;
         }
@@ -291,8 +291,6 @@ public class CityCamActivity extends AppCompatActivity {
         void updateView() {
             if (cityCamActivity != null) {
                 cityCamActivity.camImageView.setImageBitmap(webcam.getBitmap());
-                progressView.setVisibility(View.GONE);
-                isDownloaded = true;
             }
         }
 
