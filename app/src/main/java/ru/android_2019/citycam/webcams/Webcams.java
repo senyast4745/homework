@@ -5,6 +5,8 @@ import android.net.Uri;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import ru.android_2019.citycam.R;
+
 /**
  * Константы для работы с Webcams API
  */
@@ -12,7 +14,7 @@ public final class Webcams {
 
     // Зарегистрируйтесь на http://ru.webcams.travel/developers/
     // и вставьте сюда ваш devid
-    private static final String DEV_ID = "Ваш devid";
+    private static final String DEV_ID = "5afc8f0d6amshc677913948c374bp1dfe7ajsn3c562e877ada";
 
     private static final String BASE_URL = "http://api.webcams.travel/rest";
 
@@ -42,5 +44,6 @@ public final class Webcams {
         return new URL(uri.toString());
     }
 
-    private Webcams() {}
+    private Webcams() {
+    }
 }

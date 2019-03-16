@@ -1,13 +1,21 @@
 package ru.android_2019.citycam;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+
 import ru.android_2019.citycam.model.City;
+import ru.android_2019.citycam.webcams.Webcams;
 
 /**
  * Экран, показывающий веб-камеру одного выбранного города.
@@ -36,15 +44,43 @@ public class CityCamActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_city_cam);
-        camImageView = (ImageView) findViewById(R.id.cam_image);
-        progressView = (ProgressBar) findViewById(R.id.progress);
+        camImageView = findViewById(R.id.cam_image);
+        progressView = findViewById(R.id.progress);
 
-        getSupportActionBar().setTitle(city.name);
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setTitle(city.name);
+        }
 
         progressView.setVisibility(View.VISIBLE);
 
+        new  DownloadImgTask().execute(city);
         // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
         // в выбранном городе.
+
+
+    }
+
+    private class DownloadImgTask extends AsyncTask<City, Void, Void> {
+
+        @Override
+        protected Void doInBackground(City... cities) {
+            City city = cities[0];
+            try {
+                HttpURLConnection httpURLConnection = (HttpURLConnection) Webcams.createNearbyUrl(city.getLatitude(), city.getLongitude()).openConnection();
+                httpURLConnection.connect();
+
+                JsonReader jsonReader = new JsonReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                jsonReader.beginArray();
+                while (jsonReader.hasNext()){
+                    String key
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     private static final String TAG = "CityCam";

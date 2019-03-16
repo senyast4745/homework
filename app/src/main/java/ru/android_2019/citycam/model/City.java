@@ -2,6 +2,7 @@ package ru.android_2019.citycam.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 /**
  * Город
@@ -16,12 +17,12 @@ public class City implements Parcelable {
     /**
      * Широта
      */
-    public final double latitude;
+    private final double latitude;
 
     /**
      * Долгота
      */
-    public final double longitude;
+    private final double longitude;
 
 
     public City(String name, double latitude, double longitude) {
@@ -30,6 +31,7 @@ public class City implements Parcelable {
         this.longitude = longitude;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "City[name=\"" + name + "\" lat=" + latitude + " lon=" + longitude + "]";
@@ -66,4 +68,12 @@ public class City implements Parcelable {
             return new City[size];
         }
     };
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
 }

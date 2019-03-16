@@ -3,6 +3,7 @@ package ru.android_2019.citycam.list;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
@@ -22,10 +23,10 @@ public class RecylcerDividersDecorator extends RecyclerView.ItemDecoration {
     }
 
     @Override
-    public void getItemOffsets(Rect outRect,
-                               View view,
-                               RecyclerView recyclerView,
-                               RecyclerView.State state) {
+    public void getItemOffsets(@NonNull Rect outRect,
+                               @NonNull View view,
+                               @NonNull RecyclerView recyclerView,
+                               @NonNull RecyclerView.State state) {
         int position = recyclerView.getChildLayoutPosition(view);
         RecyclerView.Adapter adapter = recyclerView.getAdapter();
         int itemCount = adapter == null ? 0 : adapter.getItemCount();
@@ -38,7 +39,7 @@ public class RecylcerDividersDecorator extends RecyclerView.ItemDecoration {
     }
 
     @Override
-    public void onDrawOver(Canvas c, RecyclerView recyclerView, RecyclerView.State state) {
+    public void onDrawOver(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.State state) {
         RecyclerView.Adapter adapter = recyclerView.getAdapter();
         int itemCount = adapter == null ? 0 : adapter.getItemCount();
 
