@@ -29,6 +29,7 @@ public class CitiesRecyclerAdapter extends RecyclerView.Adapter<CitiesRecyclerAd
         citySelectedListener = listener;
     }
 
+    @NonNull
     @Override
     public CityViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = layoutInflater.inflate(R.layout.item_city, parent, false);
@@ -61,7 +62,7 @@ public class CitiesRecyclerAdapter extends RecyclerView.Adapter<CitiesRecyclerAd
 
         CityViewHolder(View itemView) {
             super(itemView);
-            cityNameView =  itemView.findViewById(R.id.city_name);
+            cityNameView = (TextView) itemView.findViewById(R.id.city_name);
         }
     }
 }
