@@ -1,8 +1,10 @@
 package ru.android_2019.citycam;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -45,15 +47,19 @@ public class CityCamActivity extends AppCompatActivity {
 
     private PictureDownloadTask pictureDownloadTask;
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     protected void onDestroy() {
+        pictureDownloadTask.attachActivity(null);
         super.onDestroy();
     }
 
     @Override
     public Object onRetainCustomNonConfigurationInstance() {
-        pictureDownloadTask.attachActivity(null);
         return pictureDownloadTask;
     }
 
@@ -71,51 +77,53 @@ public class CityCamActivity extends AppCompatActivity {
         camImageView = findViewById(R.id.cam_image);
         progressView = findViewById(R.id.progress);
 
+        progressView.setVisibility(View.VISIBLE);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(city.getName());
         }
 
+
         if (savedInstanceState != null) {
             // Пытаемся получить ранее запущенный таск
-            pictureDownloadTask = (PictureDownloadTask) getLastNonConfigurationInstance();
+            pictureDownloadTask = (PictureDownloadTask) getLastCustomNonConfigurationInstance();
         }
         if (pictureDownloadTask == null) {
             // Создаем новый таск, только если не было ранее запущенного таска
-            pictureDownloadTask = new PictureDownloadTask(camImageView, progressView);
-            pictureDownloadTask.execute();
+            Log.d(LOG_TAG, "download");
+            pictureDownloadTask = new PictureDownloadTask(this, progressView);
+            pictureDownloadTask.execute(city);
         } else {
             // Передаем в ранее запущенный таск текущий объект Activity
+            Log.d(LOG_TAG, "download continue");
             pictureDownloadTask.attachActivity(this);
+            if(pictureDownloadTask.isDownloaded()){
+                progressView.setVisibility(View.GONE);
+            }
+            //pictureDownloadTask.onPostExecute(null);
+
         }
 
 
 
-        progressView.setVisibility(View.VISIBLE);
 
-         = new PictureDownloadTask();
 
-        pictureDownloadTask.execute(city);
-        // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
-        // в выбранном городе.
     }
 
 
     static class PictureDownloadTask extends AsyncTask<City, Void, Void> {
 
-        //String title, stringUrl;
-        //long time;
-        //private Bitmap bitmap;
-        @SuppressLint("StaticFieldLeak")
-        private ImageView camImageView;
         @SuppressLint("StaticFieldLeak")
         private ProgressBar progressView;
         private Webcam webcam;
         private List<Webcam> webcams;
+        private boolean isDownloaded;
 
         private CityCamActivity cityCamActivity;
 
-        public PictureDownloadTask(ImageView camImageView, ProgressBar progressView) {
-            this.camImageView = camImageView;
+        public PictureDownloadTask(CityCamActivity cityCamActivity, ProgressBar progressView) {
+            isDownloaded = false;
+            this.cityCamActivity = cityCamActivity;
             this.progressView = progressView;
         }
 
@@ -124,11 +132,13 @@ public class CityCamActivity extends AppCompatActivity {
             super.onPreExecute();
             webcam = new Webcam();
             webcams = new ArrayList<>();
+            updateView();
         }
 
         @Override
         protected Void doInBackground(City... cities) {
             City city = cities[0];
+            Log.d(LOG_TAG, "execute task");
             try {
                 HttpURLConnection httpURLConnection = (HttpURLConnection) Webcams.createNearbyUrl(city.getLatitude(), city.getLongitude()).openConnection();
                 httpURLConnection.setReadTimeout(3000);
@@ -145,11 +155,10 @@ public class CityCamActivity extends AppCompatActivity {
                 while (reader.hasNext()) {
                     String name = reader.nextName();
                     //TODO
-                    Log.d(LOG_TAG, name);
                     switch (name) {
                         case "status":
                             String resultCode = reader.nextString();
-                            Log.d(LOG_TAG, "---" + resultCode + " " + httpURLConnection.getResponseCode());
+                            Log.d(LOG_TAG,  name + " " + resultCode );
                             if (!resultCode.equals("OK")) {
                                 return null;
                             }
@@ -169,11 +178,14 @@ public class CityCamActivity extends AppCompatActivity {
                 webcam.setBitmap(BitmapFactory.decodeStream(in));
 
                 reader.close();
+                httpURLConnection.disconnect();
+
+
             } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
-
             }
+            isDownloaded = true;
+            progressView.setVisibility(View.GONE);
             return null;
         }
 
@@ -183,11 +195,11 @@ public class CityCamActivity extends AppCompatActivity {
             while (reader.hasNext()) {
 
                 String jsonName = reader.nextName();
-                Log.d(LOG_TAG, "key of json in readResult " + jsonName);
+                //Log.d(LOG_TAG, "key of json in readResult " + jsonName);
                 switch (jsonName) {
                     case "webcams":
                         //reader.beginArray();
-                        Log.d(LOG_TAG, "read webcam");
+                       // Log.d(LOG_TAG, "read webcam");
                         readWebCamObject(reader);
                         //reader.endArray();
                         break;
@@ -202,7 +214,7 @@ public class CityCamActivity extends AppCompatActivity {
         private void readWebCamObject(JsonReader reader) throws IOException {
             reader.beginArray();
             while (reader.hasNext()) {
-                Log.d(LOG_TAG, "next object ");
+                //Log.d(LOG_TAG, "next object ");
                 reader.beginObject();
                 while (reader.hasNext()) {
 
@@ -258,17 +270,39 @@ public class CityCamActivity extends AppCompatActivity {
             reader.endObject();
         }
 
+        public boolean isDownloaded() {
+            return isDownloaded;
+        }
+
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            isDownloaded = true;
             progressView.setVisibility(View.GONE);
-            camImageView.setImageBitmap(webcam.getBitmap());
+            updateView();
         }
 
         void attachActivity(CityCamActivity activity) {
             this.cityCamActivity = activity;
-            updateView();
+            updateView(View.GONE);
         }
+
+
+        void updateView() {
+            if (cityCamActivity != null) {
+                cityCamActivity.camImageView.setImageBitmap(webcam.getBitmap());
+
+            }
+        }
+
+        void updateView(int a) {
+            if (cityCamActivity != null) {
+                cityCamActivity.camImageView.setImageBitmap(webcam.getBitmap());
+
+            }
+            progressView.setVisibility(a);
+        }
+
 
     }
 
