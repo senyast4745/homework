@@ -7,15 +7,7 @@ public class Webcam {
     private String title;
     private String imgUrl;
     private String time;
-    private long id;
     private Bitmap bitmap;
-
-    public Webcam(String title, String imgUrl, String time, long id) {
-        this.title = title;
-        this.imgUrl = imgUrl;
-        this.time = time;
-        this.id = id;
-    }
 
     public Webcam() {
     }
@@ -53,11 +45,4 @@ public class Webcam {
         this.time = time;
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 }

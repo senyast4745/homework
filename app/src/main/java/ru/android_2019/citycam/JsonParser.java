@@ -22,15 +22,13 @@ public class JsonParser {
     private List<Webcam> webcams;
     private Random random = new Random();
 
-    public JsonParser(JsonReader reader) {
-        //webcam = new Webcam();
+    JsonParser(JsonReader reader) {
         this.reader = reader;
         webcams = new ArrayList<>();
     }
 
-    public void mainJsonParser() throws IOException {
+    void mainJsonParser() throws IOException {
         reader.beginObject();
-        //Log.d(LOG_TAG, "Begin connect " + reader.nextName() + " " + reader.nextName());
         while (reader.hasNext()) {
             String name = reader.nextName();
             //TODO
@@ -61,13 +59,9 @@ public class JsonParser {
         while (reader.hasNext()) {
 
             String jsonName = reader.nextName();
-            //Log.d(LOG_TAG, "key of json in readResult " + jsonName);
             switch (jsonName) {
                 case "webcams":
-                    //reader.beginArray();
-                    // Log.d(LOG_TAG, "read webcam");
-                    readWebСamArray(reader);
-                    //reader.endArray();
+                    readWebCamArray(reader);
                     break;
                 default:
                     reader.skipValue();
@@ -76,7 +70,7 @@ public class JsonParser {
         reader.endObject();
     }
 
-    private void readWebСamArray(JsonReader reader) throws IOException {
+    private void readWebCamArray(JsonReader reader) throws IOException {
         reader.beginArray();
         while (reader.hasNext()) {
             webcams.add(readWebCamObject(reader));
@@ -142,17 +136,13 @@ public class JsonParser {
         reader.endObject();
     }
 
-    public List<Webcam> getWebcams() {
+    List<Webcam> getWebcams() {
         return webcams;
     }
 
-    public Webcam getWebCam(int index) {
+    private Webcam getWebCam(int index) {
         Log.d(LOG_TAG, webcams.get(index).getTitle());
         return webcams.get(index);
-    }
-
-    public int webCamsListSize() {
-        return webcams.size();
     }
 
     public Webcam getRandomWebcam() {
@@ -160,10 +150,10 @@ public class JsonParser {
         return getWebCam(index);
     }
 
-    private String parseTime(long epoch){
+    private String parseTime(long epoch) {
 
         @SuppressLint("SimpleDateFormat")
-        String date = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new java.util.Date (epoch*1000));
+        String date = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new java.util.Date(epoch * 1000));
         return date;
     }
 

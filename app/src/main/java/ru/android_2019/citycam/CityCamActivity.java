@@ -199,7 +199,6 @@ public class CityCamActivity extends AppCompatActivity {
         }
 
 
-
         boolean isDownloaded() {
             return isDownloaded;
         }
@@ -207,7 +206,7 @@ public class CityCamActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Log.d(LOG_TAG,  "task executed");
+            Log.d(LOG_TAG, "task executed");
             super.onPostExecute(aVoid);
             isDownloaded = true;
             progressView.setVisibility(View.GONE);
@@ -258,8 +257,8 @@ public class CityCamActivity extends AppCompatActivity {
                 String title = tmpWebcam.getTitle();
                 cityCamActivity.timeTextView.setText(cityCamActivity.getString(R.string.last_update_time) + " " + time);
                 cityCamActivity.titleTextView.setText(cityCamActivity.getString(R.string.about_location) + " " + title);
-            } else{
-                if(isDownloaded) {
+            } else {
+                if (isDownloaded) {
                     cityCamActivity.camImageView.setImageResource(R.drawable.page_not_foud);
                 }
             }
