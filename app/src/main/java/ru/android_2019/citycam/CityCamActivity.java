@@ -211,7 +211,6 @@ public class CityCamActivity extends AppCompatActivity {
             super.onPostExecute(aVoid);
             isDownloaded = true;
             progressView.setVisibility(View.GONE);
-            cityCamActivity.checkDownLoad(webcams);
             updateView();
         }
 
