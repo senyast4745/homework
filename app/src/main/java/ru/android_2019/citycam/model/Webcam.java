@@ -6,11 +6,11 @@ public class Webcam {
 
     private String title;
     private String imgUrl;
-    private long time;
+    private String time;
     private long id;
     private Bitmap bitmap;
 
-    public Webcam(String title, String imgUrl, long time, long id) {
+    public Webcam(String title, String imgUrl, String time, long id) {
         this.title = title;
         this.imgUrl = imgUrl;
         this.time = time;
@@ -45,11 +45,11 @@ public class Webcam {
         this.imgUrl = imgUrl;
     }
 
-    public long getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(long time) {
+    public void setTime(String time) {
         this.time = time;
     }
 
