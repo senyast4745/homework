@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">City Cam</string>
-    <string name="dev_key">5afc8f0d6amshc677913948c374bp1dfe7ajsn3c562e877ada</string>
+    <string name="cam_api_key">bb43131250mshf0d6ed9887777a2p1fada8jsnb76edde66d91</string>
+    <string name="last_update_time">Последнее обновление: </string>
+    <string name="about_location">О месте: </string>
+    <string name="next_button">Далее</string>
+    <string name="prev_button">Назад</string>
 </resources>

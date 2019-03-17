@@ -11,6 +11,4 @@
     android:focusableInTouchMode="false"
     android:focusable="true"
     android:clickable="true"
-    android:background="@drawable/item_selector_bg"
-    android:paddingStart="?android:attr/listPreferredItemPaddingLeft"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingRight" />
+    android:background="@drawable/item_selector_bg"/>
