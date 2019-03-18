@@ -15,14 +15,12 @@ import ru.android_2019.citycam.model.City;
 
 public class SelectCityActivity extends AppCompatActivity implements CitySelectedListener {
 
-    // Прокручивающийся список городов
-    private RecyclerView recyclerView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_city);
-        recyclerView = findViewById(R.id.list);
+        // Прокручивающийся список городов
+        RecyclerView recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addItemDecoration(new RecylcerDividersDecorator(Color.DKGRAY));
         CitiesRecyclerAdapter adapter = new CitiesRecyclerAdapter(this);

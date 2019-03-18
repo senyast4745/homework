@@ -4,10 +4,12 @@ import android.graphics.Bitmap;
 
 public class Webcam {
 
+
     private String title;
     private String imgUrl;
     private String time;
     private Bitmap bitmap;
+    private int id;
 
     public Webcam() {
     }
@@ -32,7 +34,6 @@ public class Webcam {
         return imgUrl;
     }
 
-
     public void setImgUrl(String imgUrl) {
         this.imgUrl = imgUrl;
     }
@@ -45,4 +46,11 @@ public class Webcam {
         this.time = time;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

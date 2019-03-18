@@ -74,6 +74,7 @@ public class JsonParser {
         reader.beginArray();
         while (reader.hasNext()) {
             webcams.add(readWebCamObject(reader));
+
         }
         reader.endArray();
     }
@@ -85,6 +86,10 @@ public class JsonParser {
         while (reader.hasNext()) {
 
             switch (reader.nextName()) {
+                case "id":{
+                    webcam.setId(reader.nextInt());
+                    break;
+                }
                 case "image":
                     readImage(reader, webcam);
                     break;

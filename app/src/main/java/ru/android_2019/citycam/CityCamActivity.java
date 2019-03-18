@@ -2,6 +2,7 @@ package ru.android_2019.citycam;
 
 import android.annotation.SuppressLint;
 
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -22,6 +23,8 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.room.Room;
+import ru.android_2019.citycam.dataBase.WebCamDataBase;
 import ru.android_2019.citycam.model.City;
 import ru.android_2019.citycam.model.Webcam;
 import ru.android_2019.citycam.webcams.Webcams;
@@ -45,9 +48,16 @@ public class CityCamActivity extends AppCompatActivity {
     private TextView timeTextView;
     private TextView titleTextView;
     int countOfWebcam;
-    List<Webcam> webcams;
+    private List<Webcam> webcams;
+    private City city;
+    private WebCamDataBase db;
+    private boolean isDownload;
 
     private PictureDownloadTask pictureDownloadTask;
+
+    public void setDownload(boolean download) {
+        isDownload = download;
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -69,7 +79,7 @@ public class CityCamActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        City city = getIntent().getParcelableExtra(EXTRA_CITY);
+        city = getIntent().getParcelableExtra(EXTRA_CITY);
         if (city == null) {
             Log.w(TAG, "City object not provided in extra parameter: " + EXTRA_CITY);
             finish();
@@ -81,34 +91,42 @@ public class CityCamActivity extends AppCompatActivity {
         timeTextView = findViewById(R.id.activity_city_cam_text_last_update);
         titleTextView = findViewById(R.id.activity_city_cam_text_location);
 
-        progressView.setVisibility(View.VISIBLE);
-        countOfWebcam = 0;
-
-        if (getSupportActionBar() != null) {
-            if (city != null) {
-                getSupportActionBar().setTitle(city.getName());
-            }
-        }
-
-
-        if (savedInstanceState != null) {
-            // Пытаемся получить ранее запущенный таск
-            pictureDownloadTask = (PictureDownloadTask) getLastCustomNonConfigurationInstance();
-        }
-        if (pictureDownloadTask == null) {
-            // Создаем новый таск, только если не было ранее запущенного таска
-            Log.d(LOG_TAG, "download");
-            pictureDownloadTask = new PictureDownloadTask(this, progressView);
-            pictureDownloadTask.execute(city);
+        db = Room.databaseBuilder(getApplicationContext(),
+                WebCamDataBase.class, "populus-database").build();
+        webcams = db.getWebcamDao().selectAll();
+        if (webcams != null) {
+            setupButtons();
         } else {
-            // Передаем в ранее запущенный таск текущий объект Activity
-            Log.d(LOG_TAG, "download continue");
-            pictureDownloadTask.attachActivity(this);
-            if (pictureDownloadTask.isDownloaded()) {
-                progressView.setVisibility(View.GONE);
+            progressView.setVisibility(View.VISIBLE);
+            countOfWebcam = 0;
+
+            if (getSupportActionBar() != null) {
+                if (city != null) {
+                    getSupportActionBar().setTitle(city.getName());
+                }
+            }
+
+
+            if (savedInstanceState != null) {
+                // Пытаемся получить ранее запущенный таск
+                pictureDownloadTask = (PictureDownloadTask) getLastCustomNonConfigurationInstance();
+            }
+            if (pictureDownloadTask == null) {
+                // Создаем новый таск, только если не было ранее запущенного таска
+                Log.d(LOG_TAG, "download");
+                pictureDownloadTask = new PictureDownloadTask(this, progressView);
+                pictureDownloadTask.execute(city);
+            } else {
+                // Передаем в ранее запущенный таск текущий объект Activity
+                Log.d(LOG_TAG, "download continue");
+                pictureDownloadTask.attachActivity(this);
+                if (isDownload) {
+                    progressView.setVisibility(View.GONE);
+                }
             }
 
         }
+
 
         //webcams  =  pictureDownloadTask.getWebcams();
         //Log.d(LOG_TAG, webcams.get(countOfWebcam).getTitle());
@@ -117,21 +135,61 @@ public class CityCamActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
+    void nextWebCamImage() {
+        countOfWebcam++;
+        if (countOfWebcam > webcams.size() - 1) {
+            countOfWebcam = 0;
+        }
+        Log.d(LOG_TAG, countOfWebcam + " in next click");
+        initWebCamImage();
+    }
+
+    @SuppressLint("SetTextI18n")
+    void prevWebCamImage() {
+        countOfWebcam--;
+        if (countOfWebcam < 0) {
+            countOfWebcam = webcams.size() - 1;
+        }
+        Log.d(LOG_TAG, countOfWebcam + " in prev click");
+        initWebCamImage();
+    }
+
+    @SuppressLint("SetTextI18n")
+    void initWebCamImage() {
+        if (webcams.size() > 0) {
+            Log.d(LOG_TAG, countOfWebcam + " in init");
+            Webcam tmpWebcam = webcams.get(countOfWebcam);
+            camImageView.setImageBitmap(tmpWebcam.getBitmap());
+            String time = tmpWebcam.getTime();
+            String title = tmpWebcam.getTitle();
+            timeTextView.setText(getString(R.string.last_update_time) + " " + time);
+            titleTextView.setText(getString(R.string.about_location) + " " + title);
+        } else {
+            if (pictureDownloadTask.isDownloaded) {
+                camImageView.setImageResource(R.drawable.page_not_foud);
+            }
+        }
+    }
+
+
+    @SuppressLint("SetTextI18n")
     private void setupButtons() {
         countOfWebcam = webcams.size();
         Button nextButton = findViewById(R.id.activity_city_cam_next_button);
-        nextButton.setOnClickListener(v -> pictureDownloadTask.nextWebCamImage());
+        nextButton.setOnClickListener(v -> nextWebCamImage());
 
         Button prevButton = findViewById(R.id.activity_city_cam_prev_button);
-        prevButton.setOnClickListener(v -> pictureDownloadTask.prevWebCamImage());
+        prevButton.setOnClickListener(v -> prevWebCamImage());
 
     }
 
 
     void checkDownLoad(List<Webcam> webcams) {
-        if (pictureDownloadTask.isDownloaded()) {
+        if (isDownload) {
             progressView.setVisibility(View.GONE);
             this.webcams = webcams;
+            city.setWebcams(webcams);
+            db.getWebcamDao().insertCity(city);
             setupButtons();
 
         }
@@ -146,7 +204,6 @@ public class CityCamActivity extends AppCompatActivity {
         private boolean isDownloaded;
         private JsonParser parser;
         int countOfWebcam;
-        Webcam tmpWebcam;
 
         @SuppressLint("StaticFieldLeak")
         private CityCamActivity cityCamActivity;
@@ -199,16 +256,16 @@ public class CityCamActivity extends AppCompatActivity {
         }
 
 
-        boolean isDownloaded() {
-            return isDownloaded;
-        }
+        //boolean isDownloaded() {
+          //  return isDownloaded;
+        //}
 
 
         @Override
         protected void onPostExecute(Void aVoid) {
             Log.d(LOG_TAG, "task executed");
             super.onPostExecute(aVoid);
-            isDownloaded = true;
+            cityCamActivity.setDownload(true);
             progressView.setVisibility(View.GONE);
             updateView();
         }
@@ -222,47 +279,12 @@ public class CityCamActivity extends AppCompatActivity {
         @SuppressLint("SetTextI18n")
         void updateView() {
             if (cityCamActivity != null && webcams != null) {
-                initWebCamImage();
+                cityCamActivity.initWebCamImage();
                 cityCamActivity.checkDownLoad(webcams);
             }
         }
 
-        @SuppressLint("SetTextI18n")
-        void nextWebCamImage() {
-            countOfWebcam++;
-            if (countOfWebcam > webcams.size() - 1) {
-                countOfWebcam = 0;
-            }
-            Log.d(LOG_TAG, countOfWebcam + " in next click");
-            initWebCamImage();
-        }
 
-        @SuppressLint("SetTextI18n")
-        void prevWebCamImage() {
-            countOfWebcam--;
-            if (countOfWebcam < 0) {
-                countOfWebcam = webcams.size() - 1;
-            }
-            Log.d(LOG_TAG, countOfWebcam + " in prev click");
-            initWebCamImage();
-        }
-
-        @SuppressLint("SetTextI18n")
-        void initWebCamImage() {
-            if (webcams.size() > 0) {
-                Log.d(LOG_TAG, countOfWebcam + " in init");
-                tmpWebcam = webcams.get(countOfWebcam);
-                cityCamActivity.camImageView.setImageBitmap(tmpWebcam.getBitmap());
-                String time = tmpWebcam.getTime();
-                String title = tmpWebcam.getTitle();
-                cityCamActivity.timeTextView.setText(cityCamActivity.getString(R.string.last_update_time) + " " + time);
-                cityCamActivity.titleTextView.setText(cityCamActivity.getString(R.string.about_location) + " " + title);
-            } else {
-                if (isDownloaded) {
-                    cityCamActivity.camImageView.setImageResource(R.drawable.page_not_foud);
-                }
-            }
-        }
 
     }
 
