@@ -12,19 +12,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import ru.android_2019.citycam.dataBase.WebCamDataBase;
+import ru.android_2019.citycam.dataBase.WebcamDAO;
+import ru.android_2019.citycam.model.City;
 import ru.android_2019.citycam.model.Webcam;
 
 public class JsonParser {
 
     //Webcam webcam;
+    private WebCamDataBase db;
+    City city;
+    WebcamDAO webcamDAO;
     private JsonReader reader;
     private String LOG_TAG = "JsonParser";
     private List<Webcam> webcams;
     private Random random = new Random();
 
-    JsonParser(JsonReader reader) {
+
+    JsonParser(JsonReader reader, City city, WebcamDAO webcamDAO) {
         this.reader = reader;
         webcams = new ArrayList<>();
+        this.city = city;
+        this.webcamDAO = webcamDAO;
+
     }
 
     void mainJsonParser() throws IOException {
@@ -75,6 +85,7 @@ public class JsonParser {
         while (reader.hasNext()) {
             webcams.add(readWebCamObject(reader));
 
+
         }
         reader.endArray();
     }
@@ -86,10 +97,6 @@ public class JsonParser {
         while (reader.hasNext()) {
 
             switch (reader.nextName()) {
-                case "id": {
-                    webcam.setId(reader.nextInt());
-                    break;
-                }
                 case "image":
                     readImage(reader, webcam);
                     break;
@@ -104,8 +111,12 @@ public class JsonParser {
 
         }
         reader.endObject();
+        webcam.setCityName(city.getName());
         InputStream in = new URL(webcam.getImgUrl()).openStream();
         webcam.setBitmap(BitmapFactory.decodeStream(in));
+        if(webcamDAO != null){
+            webcamDAO.insertWebcam(webcam);
+        }
         return webcam;
     }
 

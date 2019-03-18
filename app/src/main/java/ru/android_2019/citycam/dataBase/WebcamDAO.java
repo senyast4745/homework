@@ -1,10 +1,11 @@
 package ru.android_2019.citycam.dataBase;
 
+import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.Query;
+
 import java.util.List;
 
-import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.Query;
 import ru.android_2019.citycam.model.City;
 import ru.android_2019.citycam.model.Webcam;
 
@@ -12,12 +13,12 @@ import ru.android_2019.citycam.model.Webcam;
 public interface WebcamDAO {
 
     @Insert
-    void insertCity(City city);
+    void insertWebcam(Webcam webcam);
 
-    @Query("SELECT * FROM city")
+    @Query("SELECT * FROM webcam")
     List<Webcam> selectAll();
 
-    @Query("SELECT * FROM city WHERE name IS :name")
-    Webcam selectByName(String name);
+    @Query("SELECT * FROM webcam WHERE cityName IS :name")
+    List<Webcam> selectByName(String name);
 
 }

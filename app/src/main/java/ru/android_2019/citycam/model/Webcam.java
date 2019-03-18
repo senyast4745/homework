@@ -1,17 +1,38 @@
 package ru.android_2019.citycam.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverters;
 import android.graphics.Bitmap;
 
+@Entity
+@TypeConverters(WebCamConverter.class)
 public class Webcam {
 
 
+    private String cityName;
     private String title;
     private String imgUrl;
     private String time;
     private Bitmap bitmap;
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @PrimaryKey(autoGenerate = true)
     private int id;
 
+
     public Webcam() {
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String camId) {
+        this.cityName = camId;
     }
 
     public Bitmap getBitmap() {
@@ -48,9 +69,5 @@ public class Webcam {
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 }

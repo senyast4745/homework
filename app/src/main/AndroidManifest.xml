@@ -9,8 +9,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        tools:replace="android:appComponentFactory"
-        tools:ignore="AllowBackup,GoogleAppIndexingWarning"
+        android:name=".MyApplication"
         >
 
         <activity android:name=".SelectCityActivity" >

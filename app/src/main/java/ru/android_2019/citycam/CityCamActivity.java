@@ -23,8 +23,8 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.room.Room;
 import ru.android_2019.citycam.dataBase.WebCamDataBase;
+import ru.android_2019.citycam.dataBase.WebcamDAO;
 import ru.android_2019.citycam.model.City;
 import ru.android_2019.citycam.model.Webcam;
 import ru.android_2019.citycam.webcams.Webcams;
@@ -52,6 +52,7 @@ public class CityCamActivity extends AppCompatActivity {
     private City city;
     private WebCamDataBase db;
     private boolean isDownload;
+    WebcamDAO webcamDAO;
 
     private PictureDownloadTask pictureDownloadTask;
 
@@ -91,40 +92,32 @@ public class CityCamActivity extends AppCompatActivity {
         timeTextView = findViewById(R.id.activity_city_cam_text_last_update);
         titleTextView = findViewById(R.id.activity_city_cam_text_location);
 
-        db = Room.databaseBuilder(getApplicationContext(),
-                WebCamDataBase.class, "populus-database").build();
-        webcams = db.getWebcamDao().selectAll();
-        if (webcams != null) {
-            setupButtons();
+        webcamDAO = MyApplication.getInstance().getDataBase().getWebcamDao();
+
+        progressView.setVisibility(View.VISIBLE);
+        countOfWebcam = 0;
+
+        if (getSupportActionBar() != null) {
+            if (city != null) {
+                getSupportActionBar().setTitle(city.getName());
+            }
+        }
+        if (savedInstanceState != null) {
+            // Пытаемся получить ранее запущенный таск
+            pictureDownloadTask = (PictureDownloadTask) getLastCustomNonConfigurationInstance();
+        }
+        if (pictureDownloadTask == null) {
+            // Создаем новый таск, только если не было ранее запущенного таска
+            Log.d(LOG_TAG, "download");
+            pictureDownloadTask = new PictureDownloadTask(this, progressView);
+            pictureDownloadTask.execute(city);
         } else {
-            progressView.setVisibility(View.VISIBLE);
-            countOfWebcam = 0;
-
-            if (getSupportActionBar() != null) {
-                if (city != null) {
-                    getSupportActionBar().setTitle(city.getName());
-                }
+            // Передаем в ранее запущенный таск текущий объект Activity
+            Log.d(LOG_TAG, "download continue");
+            pictureDownloadTask.attachActivity(this);
+            if (isDownload) {
+                progressView.setVisibility(View.GONE);
             }
-
-
-            if (savedInstanceState != null) {
-                // Пытаемся получить ранее запущенный таск
-                pictureDownloadTask = (PictureDownloadTask) getLastCustomNonConfigurationInstance();
-            }
-            if (pictureDownloadTask == null) {
-                // Создаем новый таск, только если не было ранее запущенного таска
-                Log.d(LOG_TAG, "download");
-                pictureDownloadTask = new PictureDownloadTask(this, progressView);
-                pictureDownloadTask.execute(city);
-            } else {
-                // Передаем в ранее запущенный таск текущий объект Activity
-                Log.d(LOG_TAG, "download continue");
-                pictureDownloadTask.attachActivity(this);
-                if (isDownload) {
-                    progressView.setVisibility(View.GONE);
-                }
-            }
-
         }
 
 
@@ -156,7 +149,7 @@ public class CityCamActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     void initWebCamImage() {
-        if (webcams.size() > 0) {
+        if (webcams != null && webcams.size() > 0) {
             Log.d(LOG_TAG, countOfWebcam + " in init");
             Webcam tmpWebcam = webcams.get(countOfWebcam);
             camImageView.setImageBitmap(tmpWebcam.getBitmap());
@@ -189,10 +182,13 @@ public class CityCamActivity extends AppCompatActivity {
             progressView.setVisibility(View.GONE);
             this.webcams = webcams;
             city.setWebcams(webcams);
-            db.getWebcamDao().insertCity(city);
+
             setupButtons();
 
         }
+    }
+    public void setWebcams(List<Webcam> webcams) {
+        this.webcams = webcams;
     }
 
 
@@ -222,6 +218,8 @@ public class CityCamActivity extends AppCompatActivity {
             updateView();
         }
 
+
+
         @Override
         @WorkerThread
         protected Void doInBackground(City... cities) {
@@ -239,7 +237,7 @@ public class CityCamActivity extends AppCompatActivity {
 
                 JsonReader reader = new JsonReader(new InputStreamReader(httpURLConnection.getInputStream()));
 
-                parser = new JsonParser(reader);
+                parser = new JsonParser(reader, city, cityCamActivity.webcamDAO);
                 parser.mainJsonParser();
 
                 Log.d(LOG_TAG, "Begin connect");
@@ -251,7 +249,9 @@ public class CityCamActivity extends AppCompatActivity {
 
 
             } catch (IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                cityCamActivity.setWebcams(cityCamActivity.webcamDAO.selectByName(city.getName()));
+                cityCamActivity.initWebCamImage();
             }
 
             return null;
