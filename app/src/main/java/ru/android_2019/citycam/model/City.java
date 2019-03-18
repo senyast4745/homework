@@ -3,14 +3,21 @@ package ru.android_2019.citycam.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.List;
+
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 /**
  * Город
  */
+@Entity
 public class City implements Parcelable {
 
     /**
      * Название
      */
+    @PrimaryKey
     public final String name;
 
     /**
@@ -22,6 +29,8 @@ public class City implements Parcelable {
      * Долгота
      */
     private final double longitude;
+
+    private List<Webcam> webcams;
 
 
     public City(String name, double latitude, double longitude) {
@@ -42,6 +51,14 @@ public class City implements Parcelable {
 
     public double getLongitude() {
         return longitude;
+    }
+
+    public List<Webcam> getWebcams() {
+        return webcams;
+    }
+
+    public void setWebcams(List<Webcam> webcams) {
+        this.webcams = webcams;
     }
 
     public String getName() {

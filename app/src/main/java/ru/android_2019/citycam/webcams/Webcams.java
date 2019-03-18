@@ -13,14 +13,13 @@ public final class Webcams {
 
     // Зарегистрируйтесь на http://ru.webcams.travel/developers/
     // и вставьте сюда ваш devid
-    private static final String DEV_ID = "4959a7a20cbe6f5ce1496c90e1c752c9";
 
     private static final String BASE_URL = "https://webcamstravel.p.rapidapi.com/webcams/";
 
     private static final String PARAM_LANG = "lang";
     private static final String PARAM_SHOW = "show";
 
-    private static final String SHOW = "webcams:image,location,title";
+    private static final String SHOW = "webcams:id,image,location,title";
     private static final String LANG = "en";
     private static final int RADIUS = 200;
     private static final String METHOD_NEARBY = "list/nearby";
