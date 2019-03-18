@@ -10,23 +10,20 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import ru.android_2019.citycam.dataBase.WebCamDataBase;
 import ru.android_2019.citycam.dataBase.WebcamDAO;
 import ru.android_2019.citycam.model.City;
 import ru.android_2019.citycam.model.Webcam;
 
-public class JsonParser {
+class JsonParser {
 
-    //Webcam webcam;
-    private WebCamDataBase db;
-    City city;
-    WebcamDAO webcamDAO;
+
+    private City city;
+    private WebcamDAO webcamDAO;
     private JsonReader reader;
     private String LOG_TAG = "JsonParser";
     private List<Webcam> webcams;
-    private Random random = new Random();
+
 
 
     JsonParser(JsonReader reader, City city, WebcamDAO webcamDAO) {
@@ -156,15 +153,8 @@ public class JsonParser {
         return webcams;
     }
 
-    private Webcam getWebCam(int index) {
-        Log.d(LOG_TAG, webcams.get(index).getTitle());
-        return webcams.get(index);
-    }
 
-    public Webcam getRandomWebcam() {
-        int index = random.nextInt(webcams.size());
-        return getWebCam(index);
-    }
+
 
     private String parseTime(long epoch) {
 

@@ -187,6 +187,7 @@ public class CityCamActivity extends AppCompatActivity {
 
         }
     }
+
     public void setWebcams(List<Webcam> webcams) {
         this.webcams = webcams;
     }
@@ -219,7 +220,6 @@ public class CityCamActivity extends AppCompatActivity {
         }
 
 
-
         @Override
         @WorkerThread
         protected Void doInBackground(City... cities) {
@@ -249,9 +249,14 @@ public class CityCamActivity extends AppCompatActivity {
 
 
             } catch (IOException e) {
+                Log.d(LOG_TAG, "no connection");
                 //e.printStackTrace();
                 cityCamActivity.setWebcams(cityCamActivity.webcamDAO.selectByName(city.getName()));
-                cityCamActivity.initWebCamImage();
+                if (cityCamActivity.webcams != null) {
+                    cityCamActivity.initWebCamImage();
+                } else {
+                    cityCamActivity.camImageView.setImageResource(R.drawable.page_not_foud);
+                }
             }
 
             return null;
