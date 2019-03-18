@@ -259,7 +259,7 @@ public class CityCamActivity extends AppCompatActivity {
 
 
         //boolean isDownloaded() {
-          //  return isDownloaded;
+        //  return isDownloaded;
         //}
 
 
@@ -285,7 +285,6 @@ public class CityCamActivity extends AppCompatActivity {
                 cityCamActivity.checkDownLoad(webcams);
             }
         }
-
 
 
     }

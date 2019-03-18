@@ -86,7 +86,7 @@ public class JsonParser {
         while (reader.hasNext()) {
 
             switch (reader.nextName()) {
-                case "id":{
+                case "id": {
                     webcam.setId(reader.nextInt());
                     break;
                 }
