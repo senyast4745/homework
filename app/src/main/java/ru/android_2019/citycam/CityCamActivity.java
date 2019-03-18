@@ -177,7 +177,9 @@ public class CityCamActivity extends AppCompatActivity {
                 httpURLConnection.setDoInput(true);
                 httpURLConnection.setRequestMethod("GET");
                 httpURLConnection.setRequestProperty("X-RapidAPI-KEY", devId);
+                Log.d(LOG_TAG, httpURLConnection.toString());
                 httpURLConnection.connect();
+
                 JsonReader reader = new JsonReader(new InputStreamReader(httpURLConnection.getInputStream()));
 
                 parser = new JsonParser(reader);
