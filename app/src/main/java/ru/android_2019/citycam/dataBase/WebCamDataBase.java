@@ -1,9 +1,10 @@
 package ru.android_2019.citycam.dataBase;
 
 
-
+import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;
+import android.arch.persistence.room.migration.Migration;
 
 import ru.android_2019.citycam.model.City;
 import ru.android_2019.citycam.model.Webcam;
@@ -13,4 +14,7 @@ public abstract class WebCamDataBase extends RoomDatabase {
 
     public abstract WebcamDAO getWebcamDao();
 
+
 }
+
+

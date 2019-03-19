@@ -1,12 +1,15 @@
 package ru.android_2019.citycam;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.JsonReader;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +28,14 @@ class JsonParser {
     private List<Webcam> webcams;
 
 
-
     JsonParser(JsonReader reader, City city, WebcamDAO webcamDAO) {
         this.reader = reader;
         webcams = new ArrayList<>();
         this.city = city;
         this.webcamDAO = webcamDAO;
+        if(webcamDAO!= null && webcamDAO.selectByName(city.getName()) != null){
+            webcamDAO.deleteByCityName(city.getName());
+        }
 
     }
 
@@ -62,7 +67,7 @@ class JsonParser {
 
     private void readResult(JsonReader reader) throws IOException {
         reader.beginObject();
-
+        Log.d(LOG_TAG, "read result ");
         while (reader.hasNext()) {
 
             String jsonName = reader.nextName();
@@ -89,7 +94,7 @@ class JsonParser {
 
     private Webcam readWebCamObject(JsonReader reader) throws IOException {
         Webcam webcam = new Webcam();
-        //Log.d(LOG_TAG, "next object ");
+        Log.d(LOG_TAG, "next object ");
         reader.beginObject();
         while (reader.hasNext()) {
 
@@ -99,7 +104,7 @@ class JsonParser {
                     break;
                 case "title":
                     String tmp = reader.nextString();
-                    Log.d(LOG_TAG, "title of webcam" + tmp);
+                    Log.d(LOG_TAG, "title of webcam " + tmp);
                     webcam.setTitle(tmp);
                     break;
                 default:
@@ -111,7 +116,12 @@ class JsonParser {
         webcam.setCityName(city.getName());
         InputStream in = new URL(webcam.getImgUrl()).openStream();
         webcam.setBitmap(BitmapFactory.decodeStream(in));
-        if(webcamDAO != null){
+        /*ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        webcam.getBitmap().compress(Bitmap.CompressFormat.PNG, 100, bos);
+        webcam.setImage(bos.toByteArray());*/
+        //Log.d(LOG_TAG, "byte in webcam " + String.valueOf(webcam.getImage()) );
+        if (webcamDAO != null ) {
+
             webcamDAO.insertWebcam(webcam);
         }
         return webcam;
@@ -152,8 +162,6 @@ class JsonParser {
     List<Webcam> getWebcams() {
         return webcams;
     }
-
-
 
 
     private String parseTime(long epoch) {

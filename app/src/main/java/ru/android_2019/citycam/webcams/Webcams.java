@@ -11,9 +11,6 @@ import java.net.URL;
  */
 public final class Webcams {
 
-    // Зарегистрируйтесь на http://ru.webcams.travel/developers/
-    // и вставьте сюда ваш devid
-
     private static final String BASE_URL = "https://webcamstravel.p.rapidapi.com/webcams/";
 
     private static final String PARAM_LANG = "lang";

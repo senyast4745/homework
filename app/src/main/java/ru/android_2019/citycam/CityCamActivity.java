@@ -3,9 +3,11 @@ package ru.android_2019.citycam;
 import android.annotation.SuppressLint;
 
 
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.os.Handler;
 import android.support.annotation.WorkerThread;
 import android.support.v7.app.AppCompatActivity;
 import android.util.JsonReader;
@@ -50,9 +52,17 @@ public class CityCamActivity extends AppCompatActivity {
     int countOfWebcam;
     private List<Webcam> webcams;
     private City city;
-    private WebCamDataBase db;
     private boolean isDownload;
     WebcamDAO webcamDAO;
+    private boolean isOffline;
+
+    public boolean isOffline() {
+        return isOffline;
+    }
+
+    public void setOffline(boolean offline) {
+        isOffline = offline;
+    }
 
     private PictureDownloadTask pictureDownloadTask;
 
@@ -92,10 +102,11 @@ public class CityCamActivity extends AppCompatActivity {
         timeTextView = findViewById(R.id.activity_city_cam_text_last_update);
         titleTextView = findViewById(R.id.activity_city_cam_text_location);
 
+
         webcamDAO = MyApplication.getInstance().getDataBase().getWebcamDao();
 
         progressView.setVisibility(View.VISIBLE);
-        countOfWebcam = 0;
+        //countOfWebcam = 0;
 
         if (getSupportActionBar() != null) {
             if (city != null) {
@@ -152,13 +163,18 @@ public class CityCamActivity extends AppCompatActivity {
         if (webcams != null && webcams.size() > 0) {
             Log.d(LOG_TAG, countOfWebcam + " in init");
             Webcam tmpWebcam = webcams.get(countOfWebcam);
+            Log.d(LOG_TAG, "init title " + tmpWebcam.getTitle());
+            /*if (tmpWebcam.getBitmap() == null) {
+                byte[] array = tmpWebcam.getImage();
+                tmpWebcam.setBitmap(BitmapFactory.decodeByteArray(array, 0, array.length));
+            }*/
             camImageView.setImageBitmap(tmpWebcam.getBitmap());
             String time = tmpWebcam.getTime();
             String title = tmpWebcam.getTitle();
             timeTextView.setText(getString(R.string.last_update_time) + " " + time);
             titleTextView.setText(getString(R.string.about_location) + " " + title);
         } else {
-            if (pictureDownloadTask.isDownloaded) {
+            if (isDownload || isOffline ) {
                 camImageView.setImageResource(R.drawable.page_not_foud);
             }
         }
@@ -167,20 +183,28 @@ public class CityCamActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void setupButtons() {
-        countOfWebcam = webcams.size();
+
+
+        countOfWebcam = webcams.size() - 1;
+        Log.d(LOG_TAG, "size " + webcams.size());
         Button nextButton = findViewById(R.id.activity_city_cam_next_button);
         nextButton.setOnClickListener(v -> nextWebCamImage());
 
         Button prevButton = findViewById(R.id.activity_city_cam_prev_button);
         prevButton.setOnClickListener(v -> prevWebCamImage());
+        initWebCamImage();
 
     }
 
 
     void checkDownLoad(List<Webcam> webcams) {
         if (isDownload) {
+
+
             progressView.setVisibility(View.GONE);
             this.webcams = webcams;
+            if (webcams.size() > 0)
+                Log.d(LOG_TAG, "downloaded " + webcams.get(0).getTitle());
             city.setWebcams(webcams);
 
             setupButtons();
@@ -190,6 +214,8 @@ public class CityCamActivity extends AppCompatActivity {
 
     public void setWebcams(List<Webcam> webcams) {
         this.webcams = webcams;
+        setupButtons();
+
     }
 
 
@@ -200,13 +226,14 @@ public class CityCamActivity extends AppCompatActivity {
         private List<Webcam> webcams;
         private boolean isDownloaded;
         private JsonParser parser;
-        int countOfWebcam;
+        City city;
 
         @SuppressLint("StaticFieldLeak")
         private CityCamActivity cityCamActivity;
 
         PictureDownloadTask(CityCamActivity cityCamActivity, ProgressBar progressView) {
-            countOfWebcam = 0;
+            city = null;
+            webcams = null;
             isDownloaded = false;
             this.cityCamActivity = cityCamActivity;
             this.progressView = progressView;
@@ -214,6 +241,7 @@ public class CityCamActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
+            isDownloaded = false;
             super.onPreExecute();
             webcams = new ArrayList<>();
             updateView();
@@ -223,7 +251,7 @@ public class CityCamActivity extends AppCompatActivity {
         @Override
         @WorkerThread
         protected Void doInBackground(City... cities) {
-            City city = cities[0];
+            city = cities[0];
             Log.d(LOG_TAG, "execute task");
             try {
                 HttpURLConnection httpURLConnection = (HttpURLConnection) Webcams.createNearbyUrl(city.getLatitude(), city.getLongitude()).openConnection();
@@ -250,13 +278,11 @@ public class CityCamActivity extends AppCompatActivity {
 
             } catch (IOException e) {
                 Log.d(LOG_TAG, "no connection");
+                cityCamActivity.setOffline(true);
+                webcams = cityCamActivity.webcamDAO.selectByName(city.getName());
                 //e.printStackTrace();
-                cityCamActivity.setWebcams(cityCamActivity.webcamDAO.selectByName(city.getName()));
-                if (cityCamActivity.webcams != null) {
-                    cityCamActivity.initWebCamImage();
-                } else {
-                    cityCamActivity.camImageView.setImageResource(R.drawable.page_not_foud);
-                }
+
+
             }
 
             return null;
@@ -265,16 +291,21 @@ public class CityCamActivity extends AppCompatActivity {
 
         //boolean isDownloaded() {
         //  return isDownloaded;
-        //}
+        //}cityCamActivity.setWebcams(cityCamActivity.webcamDAO.selectByName(city.getName()));
 
 
         @Override
         protected void onPostExecute(Void aVoid) {
             Log.d(LOG_TAG, "task executed");
             super.onPostExecute(aVoid);
-            cityCamActivity.setDownload(true);
             progressView.setVisibility(View.GONE);
+            if (!cityCamActivity.isOffline()) {
+                cityCamActivity.setDownload(true);
+            } else {
+                cityCamActivity.setWebcams(webcams);
+            }
             updateView();
+
         }
 
         void attachActivity(CityCamActivity activity) {
@@ -286,7 +317,6 @@ public class CityCamActivity extends AppCompatActivity {
         @SuppressLint("SetTextI18n")
         void updateView() {
             if (cityCamActivity != null && webcams != null) {
-                cityCamActivity.initWebCamImage();
                 cityCamActivity.checkDownLoad(webcams);
             }
         }

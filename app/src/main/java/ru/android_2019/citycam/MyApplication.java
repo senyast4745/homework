@@ -14,6 +14,7 @@ public class MyApplication extends Application {
         super.onCreate();
         instance = this;
         dataBase = Room.databaseBuilder(this, WebCamDataBase.class, "database")
+                .fallbackToDestructiveMigration()
                 .build();
     }
 

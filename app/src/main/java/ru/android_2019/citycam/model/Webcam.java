@@ -1,6 +1,8 @@
 package ru.android_2019.citycam.model;
 
+import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverters;
 import android.graphics.Bitmap;
@@ -14,7 +16,11 @@ public class Webcam {
     private String title;
     private String imgUrl;
     private String time;
+    //@Ignore
     private Bitmap bitmap;
+
+    /*@ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    private byte[] image;*/
 
     public void setId(int id) {
         this.id = id;
@@ -26,6 +32,14 @@ public class Webcam {
 
     public Webcam() {
     }
+
+    /*public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }*/
 
     public String getCityName() {
         return cityName;

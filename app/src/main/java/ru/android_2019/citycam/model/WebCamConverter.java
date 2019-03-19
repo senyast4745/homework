@@ -10,7 +10,7 @@ public class WebCamConverter {
     @TypeConverter
     public byte[] fromBitmap(Bitmap bitmap){
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
         return bos.toByteArray();
     }
 
